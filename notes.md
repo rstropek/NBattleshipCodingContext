@@ -24,6 +24,12 @@ dotnet sln NBattleshipCodingContest.sln add NBattleshipCodingContest.Logic.Tests
 
 * Run `dotnet list package --outdated` in test project and update all outdated references `dotnet add package ...`
 * Add [*Moq*](https://github.com/moq/moq4) to test project: `dotnet add package Moq`
+* Add to console project:
+  * [*CommandLineParser*](https://github.com/commandlineparser/commandline/wiki): `dotnet add package CommandLineParser`
+  * [*ProtoBuf*](https://developers.google.com/protocol-buffers/docs/proto3): `dotnet add package Google.Protobuf`
+  * [*Grpc*](https://grpc.io/docs/languages/csharp/quickstart/): `dotnet add package Grpc`
+  * *Grpc Tools*: `dotnet add package Grpc.Tools`
+  * *Grpc Client*: `dotnet add package Grpc.Net.Client`
 * Create [*.editorconfig* file](https://editorconfig.org/) in root of solution and copy [default config](https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference?view=vs-2019#example-editorconfig-file) from Microsoft docs
 
 ## Settings

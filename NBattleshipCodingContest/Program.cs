@@ -1,12 +1,21 @@
-﻿using System;
+﻿using CommandLine;
+using System;
 
 namespace NBattleshipCodingContest
 {
     class Program
     {
-        static void Main()
+        static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Parser.Default.ParseArguments<RunnerOptions>(args)
+                .MapResult(
+                  (RunnerOptions options) => StartRunnerAndReturnExitCode(options),
+                  errors => 1);
+        }
+
+        static int StartRunnerAndReturnExitCode(RunnerOptions options)
+        {
+            return 0;
         }
     }
 }
