@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "NBattleshipCodingContest.Manager";
+
+service Manager {
+  rpc Connect (stream Status) returns (stream GameRequest);
+}
+
+message Shot {
+	int32 gameId = 1;
+	int32 moveId = 2;
+	string location = 3;
+}
+
+message Crash {
+	int32 gameId = 1;
+}
+
+message Status {
+  oneof payload {
+	Shot shot = 1;
+	Crash crash = 2;
+  }
+}
+
+message RequestShot {
+	int32 gameId = 1;
+	int32 moveId = 2;
+	string player = 3;
+	bytes board = 4;
+}
+
+message GameRequest {
+  oneof payload {
+	RequestShot requestShot = 1;
+  }
+}
