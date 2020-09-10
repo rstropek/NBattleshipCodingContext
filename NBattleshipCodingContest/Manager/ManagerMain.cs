@@ -21,7 +21,13 @@
                     webBuilder
                         .ConfigureServices(services =>
                         {
+                            services.AddOpenApiDocument(settings =>
+                            {
+                                settings.Title = "Battleship Manager API";
+                                settings.Description = "API for Battleship manager";
+                            });
                             services.AddGrpc();
+                            services.AddControllers();
                         })
                         .Configure((context, app) =>
                         {
@@ -30,10 +36,14 @@
                                 app.UseDeveloperExceptionPage();
                             }
 
+                            app.UseOpenApi();
+                            app.UseSwaggerUi3();
+
                             app.UseRouting();
                             app.UseEndpoints(endpoints =>
                             {
                                 endpoints.MapGrpcService<ManagerService>();
+                                endpoints.MapControllers();
                             });
                         })
                         .UseUrls(options.ManagerUrl);
