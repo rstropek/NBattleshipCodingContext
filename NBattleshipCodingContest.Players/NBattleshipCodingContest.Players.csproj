@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\NBattleshipCodingContest.Logic\NBattleshipCodingContest.Logic.csproj" />
 		<ProjectReference Include="..\NBattleshipCodingContest.PlayersGenerator\NBattleshipCodingContest.PlayersGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 

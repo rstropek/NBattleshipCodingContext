@@ -1,5 +1,6 @@
 ﻿namespace NBattleshipCodingContest.Logic.Tests
 {
+    using System;
     using System.Linq;
     using Xunit;
 
@@ -50,6 +51,30 @@
             board.PlaceShip(0, 0, 1, Direction.Horizontal);
             board.ShootAt(0, 0);
             Assert.True(board.HasLost);
+        }
+
+        [Fact]
+        public void Count()
+        {
+            var board = new BattleshipBoard();
+            Assert.Equal(100, board.Count);
+        }
+
+        [Fact]
+        public void ReadOnlyList_Failure()
+        {
+            var board = new BattleshipBoard();
+            Assert.Throws<ArgumentException>(() => board[-1]);
+            Assert.Throws<ArgumentException>(() => board[10 * 10]);
+        }
+
+        [Fact]
+        public void ReadOnlyList()
+        {
+            var board = new BattleshipBoard();
+            board.PlaceShip(0, 0, 1, Direction.Horizontal);
+            Assert.Equal(SquareContent.Ship, board[0]);
+            Assert.Equal(SquareContent.Water, board[99]);
         }
     }
 }

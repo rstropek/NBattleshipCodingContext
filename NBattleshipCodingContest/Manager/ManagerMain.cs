@@ -7,6 +7,7 @@
     using Microsoft.AspNetCore.Builder;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
+    using NBattleshipCodingContest.Players;
 
     internal class ManagerMain
     {
@@ -21,6 +22,12 @@
                     webBuilder
                         .ConfigureServices(services =>
                         {
+                            // Add all players
+                            foreach (var player in PlayerList.Players)
+                            {
+                                services.AddSingleton(player);
+                            }
+
                             services.AddOpenApiDocument(settings =>
                             {
                                 settings.Title = "Battleship Manager API";

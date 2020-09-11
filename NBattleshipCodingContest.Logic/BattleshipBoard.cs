@@ -1,5 +1,6 @@
 ﻿namespace NBattleshipCodingContest.Logic
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -18,7 +19,7 @@
     /// Methods reading data are thread-safe, methods writing data are not.
     /// </para>
     /// </remarks>
-    public class BattleshipBoard : IFillableBoard, IEnumerable<SquareContent>
+    public class BattleshipBoard : IFillableBoard, IReadOnlyBoard
     {
         private readonly SquareContent[] BoardContent = new SquareContent[10 * 10];
 
@@ -54,6 +55,23 @@
         /// <returns>Content of the given square</returns>
         /// <exception cref="System.ArgumentException">Thrown in case of invalid parameters</exception>
         public SquareContent this[int col, int row] => BoardContent[GetIndex(col, row)];
+
+        /// <inheritdoc/>
+        public int Count => 10 * 10;
+
+        /// <inheritdoc/>
+        public SquareContent this[int location]
+        {
+            get
+            {
+                if (location is < 0 or >= 10 * 10)
+                {
+                    throw new ArgumentException("Invalid location, must be between 0 and 99", nameof(location));
+                }
+
+                return BoardContent[location];
+            }
+        }
 
         /// <summary>
         /// Initializes the board by using the given filler.
