@@ -4,7 +4,8 @@
     {
         Water,
         Ship,
-        HitShip
+        HitShip,
+        Unknown
     }
 
     public enum Direction : byte

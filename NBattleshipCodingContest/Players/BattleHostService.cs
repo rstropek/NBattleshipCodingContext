@@ -41,12 +41,17 @@
             // Start background task handling incoming battle requests.
             Task.Run(async () =>
             {
+                // No need to protect battle with lock because a battle host only
+                // runs a single battle at a time -> no concurrency.
+                Battle? currentBattle = null;
+
                 try
                 { 
                     await foreach (var item in Connection.ResponseStream.ReadAllAsync(CancellationToken.None))
                     {
                         switch (Connection.ResponseStream.Current.PayloadCase)
                         {
+                            case GameRequest.PayloadOneofCase.NewGame:
 
                             case GameRequest.PayloadOneofCase.RequestShot:
                                 break;

@@ -11,6 +11,6 @@
         /// <param name="row">Zero-based row index</param>
         /// <returns>Content of the given square</returns>
         /// <exception cref="System.ArgumentException">Thrown in case of invalid parameters</exception>
-        SquareContent this[int col, int row] { get; }
+        SquareContent this[BoardIndex ix] { get; }
     }
 }

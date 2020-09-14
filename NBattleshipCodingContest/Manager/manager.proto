@@ -30,8 +30,19 @@ message RequestShot {
 	bytes board = 4;
 }
 
+message ShotResult {
+	int32 squareContent = 1;
+}
+
+message NewGame {
+	int32 player1Index = 1;
+	int32 player2Index = 2;
+}
+
 message GameRequest {
   oneof payload {
-	RequestShot requestShot = 1;
+    NewGame newGame = 1;
+	RequestShot requestShot = 2;
+	ShotResult shotResult = 3;
   }
 }

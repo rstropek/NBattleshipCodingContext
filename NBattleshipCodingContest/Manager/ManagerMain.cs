@@ -35,6 +35,7 @@
                             });
                             services.AddGrpc();
                             services.AddControllers();
+                            services.AddSingleton<BattleHostConnection>();
                         })
                         .Configure((context, app) =>
                         {

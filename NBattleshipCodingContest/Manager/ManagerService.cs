@@ -14,11 +14,13 @@
         private static readonly object BattleRunnerConnectedLockObject = new object();
         private readonly ILogger<ManagerService> logger;
         private readonly IHostApplicationLifetime appLifetime;
+        private readonly BattleHostConnection battleHostConnection;
 
-        public ManagerService(ILogger<ManagerService> logger, IHostApplicationLifetime appLifetime)
+        public ManagerService(ILogger<ManagerService> logger, IHostApplicationLifetime appLifetime, BattleHostConnection battleHostConnection)
         {
             this.logger = logger;
             this.appLifetime = appLifetime;
+            this.battleHostConnection = battleHostConnection;
         }
 
         public override async Task Connect(IAsyncStreamReader<Status> requestStream, IServerStreamWriter<GameRequest> responseStream, ServerCallContext context)
@@ -35,6 +37,7 @@
                 }
 
                 BattleRunnerConnected = true;
+                battleHostConnection.ResponseStream = responseStream;
             }
 
             // Cancellation token source used to cancel the gRPC call
@@ -78,6 +81,7 @@
                 lock (BattleRunnerConnectedLockObject)
                 {
                     BattleRunnerConnected = false;
+                    battleHostConnection.ResponseStream = null;
                 }
             }
         }

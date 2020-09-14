@@ -4,7 +4,6 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using static NBattleshipCodingContest.Logic.BoardArrayIndexer;
     using static NBattleshipCodingContest.Logic.ShipPlacementChecker;
 
     /// <summary>
@@ -23,27 +22,27 @@
     {
         private readonly SquareContent[] BoardContent = new SquareContent[10 * 10];
 
-        internal void PlaceShip(int col, int row, int shipLength, Direction direction)
+        internal void PlaceShip(BoardIndex ix, int shipLength, Direction direction)
         {
             for (var i = 0; i < shipLength; i++)
             {
-                BoardContent[GetIndex(col, row)] = SquareContent.Ship;
+                BoardContent[ix] = SquareContent.Ship;
                 if (direction == Direction.Horizontal)
                 {
-                    col++;
+                    ix = ix.NextColumn();
                 }
                 else
                 {
-                    row++;
+                    ix = ix.NextRow();
                 }
             }
         }
 
-        private void Clear()
+        private void Clear(SquareContent content = SquareContent.Water)
         {
             for (var i = 0; i < 10 * 10; i++)
             {
-                BoardContent[i] = SquareContent.Water;
+                BoardContent[i] = content;
             }
         }
 
@@ -54,7 +53,7 @@
         /// <param name="row">Zero-based row index</param>
         /// <returns>Content of the given square</returns>
         /// <exception cref="System.ArgumentException">Thrown in case of invalid parameters</exception>
-        public SquareContent this[int col, int row] => BoardContent[GetIndex(col, row)];
+        public SquareContent this[BoardIndex ix] => BoardContent[ix];
 
         /// <inheritdoc/>
         public int Count => 10 * 10;
@@ -86,16 +85,24 @@
             filler.Fill(new[] { 5, 4, 3, 3, 2 }, this);
         }
 
-        /// <inheritdoc/>
-        public bool TryPlaceShip(int col, int row, int shipLength, Direction direction)
+        /// <summary>
+        /// Initializes the board with all squares unknown.
+        /// </summary>
+        public void Initialize()
         {
-            if (!CanPlaceShip(col, row, shipLength, direction,
-                (c, r) => BoardContent[GetIndex(c, r)] == SquareContent.Water))
+            Clear(SquareContent.Unknown);
+        }
+
+        /// <inheritdoc/>
+        public bool TryPlaceShip(BoardIndex ix, int shipLength, Direction direction)
+        {
+            if (!CanPlaceShip(ix, shipLength, direction,
+                (c, r) => BoardContent[ix] == SquareContent.Water))
             {
                 return false;
             }
 
-            PlaceShip(col, row, shipLength, direction);
+            PlaceShip(ix, shipLength, direction);
 
             return true;
         }
@@ -121,11 +128,12 @@
         /// New content of given board square (<see cref="SquareContent.Water"/>
         /// or <see cref="SquareContent.HitShip"/>).
         /// </returns>
-        public SquareContent ShootAt(int col, int row)
+        public SquareContent ShootAt(BoardIndex ix) => ShootAt(ix);
+
+        private SquareContent ShootAt(int ix)
         {
             // Note switch expression
 
-            var ix = GetIndex(col, row);
             var c = BoardContent[ix];
             return c switch
             {

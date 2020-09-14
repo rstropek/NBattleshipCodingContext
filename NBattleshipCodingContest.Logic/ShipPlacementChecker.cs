@@ -32,22 +32,11 @@
         /// directly adjacent to each other).
         /// </remarks>
         /// <exception cref="ArgumentException">Thrown in case of invalid argument</exception>
-        public static bool CanPlaceShip(int col, int row, int shipLength, Direction direction, IsWater isWater)
+        public static bool CanPlaceShip(BoardIndex ix, int shipLength, Direction direction, IsWater isWater)
         {
             #region Check input parameter
             // This is a public method, so we have to check that parameters
             // contain valid values.
-
-            // Check if col and row are valid
-            if (col is < 0 or > 9)
-            {
-                throw new ArgumentException("Must be between 0 and 9", nameof(col));
-            }
-
-            if (row is < 0 or > 9)
-            {
-                throw new ArgumentException("Must be between 0 and 9", nameof(row));
-            }
 
             // Check if ship isn't too long
             if (shipLength > 10)
@@ -63,7 +52,7 @@
 
             // Check if ship is placed outside bounds of board
             static bool OutsideBounds(int start, int shipLength) => start + shipLength > 10;
-            if (OutsideBounds(direction == Direction.Horizontal ? col : row, shipLength))
+            if (OutsideBounds(direction == Direction.Horizontal ? ix.Column : ix.Row, shipLength))
             {
                 return false;
             }
@@ -76,14 +65,14 @@
                 shipLength + ((index == 0 || index + shipLength == 10) ? 1 : 2);
 
             var numberOfRowsToCheck = direction == Direction.Horizontal
-                ? GetElementsToCheckAcross(row)
-                : GetElementsToCheckAlongside(row, shipLength);
+                ? GetElementsToCheckAcross(ix.Row)
+                : GetElementsToCheckAlongside(ix.Row, shipLength);
             var numberOfColsToCheck = direction == Direction.Horizontal
-                ? GetElementsToCheckAlongside(col, shipLength)
-                : GetElementsToCheckAcross(col);
+                ? GetElementsToCheckAlongside(ix.Column, shipLength)
+                : GetElementsToCheckAcross(ix.Column);
 
-            var firstCheckRow = GetFirst(row);
-            var firstCheckCol = GetFirst(col);
+            var firstCheckRow = GetFirst(ix.Row);
+            var firstCheckCol = GetFirst(ix.Column);
 
             // Check if ships overlap
             for (var r = firstCheckRow; r < firstCheckRow + numberOfRowsToCheck; r++)

@@ -19,7 +19,7 @@
         /// <c>true</c> if the ship could be placed, otherwise <c>false</c>.
         /// </returns>
         /// <exception cref="ArgumentException">Thrown in case of invalid arguments</exception>
-        bool TryPlaceShip(int col, int row, int shipLength, Direction direction);
+        bool TryPlaceShip(BoardIndex ix, int shipLength, Direction direction);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@
             var rand = new Random();
             for (var attemptsLeft = 1000; attemptsLeft > 0; attemptsLeft--)
             {
-                if (board.TryPlaceShip(rand.Next(10), rand.Next(10), shipLength,
+                if (board.TryPlaceShip(new BoardIndex(rand.Next(10), rand.Next(10)), shipLength,
                     rand.Next(2) == 0 ? Direction.Horizontal : Direction.Vertical))
                 {
                     // We found a spot
