@@ -34,7 +34,7 @@
             }
         }
 
-        public void Initialize(InitializationContext context)
+        public void Initialize(GeneratorInitializationContext context)
         {
             InitializeImpl(context.RegisterForSyntaxNotifications);
         }
@@ -45,7 +45,7 @@
             registerForSyntaxNotifications(() => new SyntaxReceiver());
         }
 
-        public void Execute(SourceGeneratorContext context)
+        public void Execute(GeneratorExecutionContext context)
         {
             // retreive the populated receiver 
             if (context.SyntaxReceiver is not SyntaxReceiver receiver || receiver.CandidateClasses == null)

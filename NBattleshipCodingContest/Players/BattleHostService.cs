@@ -43,7 +43,7 @@
             {
                 // No need to protect battle with lock because a battle host only
                 // runs a single battle at a time -> no concurrency.
-                Battle? currentBattle = null;
+                ///Battle? currentBattle = null;
 
                 try
                 { 
