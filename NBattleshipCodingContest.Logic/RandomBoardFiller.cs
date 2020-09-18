@@ -57,8 +57,11 @@
             var rand = new Random();
             for (var attemptsLeft = 1000; attemptsLeft > 0; attemptsLeft--)
             {
-                if (board.TryPlaceShip(new BoardIndex(rand.Next(10), rand.Next(10)), shipLength,
-                    rand.Next(2) == 0 ? Direction.Horizontal : Direction.Vertical))
+                var direction = rand.Next(2) == 0 ? Direction.Horizontal : Direction.Vertical;
+                if (board.TryPlaceShip(new BoardIndex(
+                    rand.Next(10 - (direction == Direction.Horizontal ? shipLength : 0)), 
+                    rand.Next(10 - (direction == Direction.Vertical ? shipLength : 0))), 
+                    shipLength, direction))
                 {
                     // We found a spot
                     return;

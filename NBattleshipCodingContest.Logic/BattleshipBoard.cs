@@ -1,8 +1,6 @@
 ﻿namespace NBattleshipCodingContest.Logic
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using static NBattleshipCodingContest.Logic.ShipPlacementChecker;
 
@@ -10,65 +8,27 @@
     /// <see cref="BattleshipBoard"/> implements a board for a battleship game.
     /// </summary>
     /// <remarks>
-    /// <para>
     /// The rules of the classical Battleship game apply (see also
     /// https://en.wikipedia.org/wiki/Battleship_(game)).
-    /// </para>
-    /// <para>
-    /// Methods reading data are thread-safe, methods writing data are not.
-    /// </para>
     /// </remarks>
-    public class BattleshipBoard : IFillableBoard, IReadOnlyBoard
+    public class BattleshipBoard : BoardContent, IFillableBoard
     {
-        private readonly SquareContent[] BoardContent = new SquareContent[10 * 10];
-
         internal void PlaceShip(BoardIndex ix, int shipLength, Direction direction)
         {
             for (var i = 0; i < shipLength; i++)
             {
-                BoardContent[ix] = SquareContent.Ship;
-                if (direction == Direction.Horizontal)
+                this[ix] = SquareContent.Ship;
+                if (i != shipLength - 1)
                 {
-                    ix = ix.NextColumn();
+                    if (direction == Direction.Horizontal)
+                    {
+                        ix = ix.NextColumn();
+                    }
+                    else
+                    {
+                        ix = ix.NextRow();
+                    }
                 }
-                else
-                {
-                    ix = ix.NextRow();
-                }
-            }
-        }
-
-        private void Clear(SquareContent content = SquareContent.Water)
-        {
-            for (var i = 0; i < 10 * 10; i++)
-            {
-                BoardContent[i] = content;
-            }
-        }
-
-        /// <summary>
-        /// Gets the content on a given board square.
-        /// </summary>
-        /// <param name="col">Zero-based column index</param>
-        /// <param name="row">Zero-based row index</param>
-        /// <returns>Content of the given square</returns>
-        /// <exception cref="System.ArgumentException">Thrown in case of invalid parameters</exception>
-        public SquareContent this[BoardIndex ix] => BoardContent[ix];
-
-        /// <inheritdoc/>
-        public int Count => 10 * 10;
-
-        /// <inheritdoc/>
-        public SquareContent this[int location]
-        {
-            get
-            {
-                if (location is < 0 or >= 10 * 10)
-                {
-                    throw new ArgumentException("Invalid location, must be between 0 and 99", nameof(location));
-                }
-
-                return BoardContent[location];
             }
         }
 
@@ -81,23 +41,19 @@
         /// </remarks>
         public void Initialize(IBoardFiller filler)
         {
-            Clear();
+            Clear(SquareContent.Water);
             filler.Fill(new[] { 5, 4, 3, 3, 2 }, this);
         }
 
         /// <summary>
         /// Initializes the board with all squares unknown.
         /// </summary>
-        public void Initialize()
-        {
-            Clear(SquareContent.Unknown);
-        }
+        public void Initialize() => Clear(SquareContent.Unknown);
 
         /// <inheritdoc/>
         public bool TryPlaceShip(BoardIndex ix, int shipLength, Direction direction)
         {
-            if (!CanPlaceShip(ix, shipLength, direction,
-                (c, r) => BoardContent[ix] == SquareContent.Water))
+            if (!CanPlaceShip(ix, shipLength, direction, (c, r) => this[new BoardIndex(c, r)] == SquareContent.Water))
             {
                 return false;
             }
@@ -106,18 +62,6 @@
 
             return true;
         }
-
-        /// <inheritdoc/>
-        public IEnumerator<SquareContent> GetEnumerator()
-        {
-            foreach (var square in BoardContent)
-            {
-                yield return square;
-            }
-        }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Places a shot at the given coordinates.
@@ -128,16 +72,16 @@
         /// New content of given board square (<see cref="SquareContent.Water"/>
         /// or <see cref="SquareContent.HitShip"/>).
         /// </returns>
-        public SquareContent ShootAt(BoardIndex ix) => ShootAt(ix);
+        public SquareContent ShootAt(BoardIndex ix) => ShootAt((int)ix);
 
         private SquareContent ShootAt(int ix)
         {
             // Note switch expression
 
-            var c = BoardContent[ix];
+            var c = this[ix];
             return c switch
             {
-                SquareContent.Ship => BoardContent[ix] = SquareContent.HitShip,
+                SquareContent.Ship => this[ix] = SquareContent.HitShip,
                 _ => c,
             };
         }

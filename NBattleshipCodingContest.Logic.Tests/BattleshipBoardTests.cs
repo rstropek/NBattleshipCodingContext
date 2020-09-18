@@ -64,8 +64,8 @@
         public void ReadOnlyList_Failure()
         {
             var board = new BattleshipBoard();
-            Assert.Throws<ArgumentException>(() => board[-1]);
-            Assert.Throws<ArgumentException>(() => board[10 * 10]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => board[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => board[10 * 10]);
         }
 
         [Fact]

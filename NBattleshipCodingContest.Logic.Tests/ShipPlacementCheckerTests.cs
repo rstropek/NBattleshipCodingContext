@@ -8,11 +8,11 @@ namespace NBattleshipCodingContest.Logic.Tests
     {
         [Fact]
         public void CanPlaceShip_Invalid_Col() =>
-            Assert.Throws<ArgumentException>("col", () => CanPlaceShip(new BoardIndex(10, 0), 2, Direction.Horizontal, (_, _) => false));
+            Assert.Throws<ArgumentOutOfRangeException>("col", () => CanPlaceShip(new BoardIndex(10, 0), 2, Direction.Horizontal, (_, _) => false));
 
         [Fact]
         public void CanPlaceShip_Invalid_Row() =>
-            Assert.Throws<ArgumentException>("row", () => CanPlaceShip(new BoardIndex(0, 10), 2, Direction.Horizontal, (_, _) => false));
+            Assert.Throws<ArgumentOutOfRangeException>("row", () => CanPlaceShip(new BoardIndex(0, 10), 2, Direction.Horizontal, (_, _) => false));
 
         [Fact]
         public void CanPlaceShip_Invalid_Direction() =>
@@ -43,8 +43,14 @@ namespace NBattleshipCodingContest.Logic.Tests
             {
                 Assert.InRange(c, minCol, maxCol);
                 Assert.InRange(r, minRow, maxRow);
-                return false;
+                return true;
             });
+        }
+
+        [Fact]
+        public void CanPlaceShip_Overlap()
+        {
+            Assert.False(CanPlaceShip(new BoardIndex(3, 2), 3, Direction.Vertical, (c, r) => !(r == 3 && c is >= 3 and <= 7)));
         }
     }
 }
