@@ -7,13 +7,10 @@ service Manager {
 }
 
 message Shot {
-	int32 gameId = 1;
-	int32 moveId = 2;
-	string location = 3;
+	string location = 1;
 }
 
 message Crash {
-	int32 gameId = 1;
 }
 
 message Status {
@@ -23,25 +20,31 @@ message Status {
   }
 }
 
+message UUID {
+  string value = 1;
+}
+
 message RequestShot {
-	int32 gameId = 1;
-	int32 moveId = 2;
-	string player = 3;
+	UUID gameId = 1;
+	int32 shooter = 2;
+	int32 opponent = 3;
 	bytes board = 4;
 }
 
-message ShotResult {
-	int32 squareContent = 1;
+enum SquareContent {
+	WATER = 0;
+	SHIP = 1;
+	HIT_SHIP = 2;
+	UNKNOWN = 3;
 }
 
-message NewGame {
-	int32 player1Index = 1;
-	int32 player2Index = 2;
+message ShotResult {
+	UUID gameId = 1;
+	SquareContent squareContent = 2;
 }
 
 message GameRequest {
   oneof payload {
-    NewGame newGame = 1;
 	RequestShot requestShot = 2;
 	ShotResult shotResult = 3;
   }

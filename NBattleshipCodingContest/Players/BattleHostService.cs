@@ -51,8 +51,6 @@
                     {
                         switch (Connection.ResponseStream.Current.PayloadCase)
                         {
-                            case GameRequest.PayloadOneofCase.NewGame:
-
                             case GameRequest.PayloadOneofCase.RequestShot:
                                 break;
                             default:

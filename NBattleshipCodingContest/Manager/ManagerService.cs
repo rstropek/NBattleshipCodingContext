@@ -59,10 +59,8 @@
                     switch (item.PayloadCase)
                     {
                         case Status.PayloadOneofCase.Shot:
-                            logger.LogInformation("Received shot to {Location} for game {GameID}.", item.Shot.GameId, item.Shot.Location);
                             break;
                         case Status.PayloadOneofCase.Crash:
-                            logger.LogWarning("Received crash of game {GameID}.", item.Crash.GameId);
                             break;
                         default:
                             logger.LogWarning("Received unknown payload type {PayloadCase}", item.PayloadCase);

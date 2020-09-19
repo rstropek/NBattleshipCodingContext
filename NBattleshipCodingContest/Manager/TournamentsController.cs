@@ -23,28 +23,28 @@
         }
 
         [HttpPost]
-        public Task<IActionResult> Start()
+        public async Task<IActionResult> Start()
         {
             if (players.Count() < 2)
             {
-                return Task.FromResult(BadRequest(new ProblemDetails
+                return BadRequest(new ProblemDetails
                 {
                     Type = "Configuration error",
                     Status = StatusCodes.Status400BadRequest,
                     Title = "Too few players",
                     Detail = "There have to be at least two players in order to start a tournament"
-                }) as IActionResult);
+                });
             }
 
             if (!battleHostConnection.IsHostConnected)
             {
-                return Task.FromResult(BadRequest(new ProblemDetails
+                return BadRequest(new ProblemDetails
                 {
                     Type = "Battle Host Error",
                     Status = StatusCodes.Status500InternalServerError,
                     Title = "No battle host connected to manager",
                     Detail = "There is not battle host connected to the manager. Did you forget to start it?"
-                }) as IActionResult);
+                });
             }
 
             var player1 = players.First();
@@ -56,15 +56,23 @@
             var boardPlayer2 = new BattleshipBoard();
             rbf.Fill(new[] { 2, 3, 3, 4, 5 }, boardPlayer2);
 
+            var shotsPlayer1 = new BoardContent();
+            shotsPlayer1.Clear(Logic.SquareContent.Unknown);
+            var shotsPlayer2 = new BoardContent();
+            shotsPlayer2.Clear(Logic.SquareContent.Unknown);
+
+            var gameId = Guid.NewGuid();
+
             while (!boardPlayer1.HasLost && !boardPlayer2.HasLost)
             {
-                //var shot1 = player1!.GetShot(boardPlayer2);
-                //boardPlayer2.ShootAt(shot1);
-                //var shot2 = player2!.GetShot(boardPlayer1);
-                //boardPlayer1.ShootAt(shot2);
+                //var location = await battleHostConnection.Shoot(0, 1, shotsPlayer1);
+                //var shotLocation = new BoardIndex(location);
+
+                
+                //await battleHostConnection.Shoot(1, 0, shotsPlayer2);
             }
 
-            return Task.FromResult(Ok() as IActionResult);
+            return Ok();
         }
     }
 }

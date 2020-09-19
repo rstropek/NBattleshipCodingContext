@@ -11,7 +11,7 @@
     /// Methods reading data are thread-safe, methods writing data are not.
     /// </para>
     /// </remarks>
-    public abstract class BoardContent : IReadOnlyBoard
+    public class BoardContent : IReadOnlyBoard
     {
         private readonly SquareContent[] boardContent = new SquareContent[10 * 10];
 
@@ -19,7 +19,7 @@
         /// Set all squares of the board to a given content
         /// </summary>
         /// <param name="content">Square content that should be written to all squares</param>
-        protected void Clear(SquareContent content)
+        public void Clear(SquareContent content)
         {
             for (var i = 0; i < 10 * 10; i++)
             {
