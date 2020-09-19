@@ -3,6 +3,7 @@
     using Grpc.Core;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using NBattleshipCodingContest.Logic;
     using NBattleshipCodingContest.Manager;
     using System.Threading;
     using System.Threading.Tasks;
@@ -41,17 +42,22 @@
             // Start background task handling incoming battle requests.
             Task.Run(async () =>
             {
-                // No need to protect battle with lock because a battle host only
-                // runs a single battle at a time -> no concurrency.
-                ///Battle? currentBattle = null;
+                var managerConnection = new BattleManagerConnection(logger)
+                {
+                    RequestStream = Connection.RequestStream
+                };
 
                 try
                 { 
                     await foreach (var item in Connection.ResponseStream.ReadAllAsync(CancellationToken.None))
                     {
-                        switch (Connection.ResponseStream.Current.PayloadCase)
+                        switch (item.PayloadCase)
                         {
                             case GameRequest.PayloadOneofCase.RequestShot:
+                                managerConnection.GetShoot(item.RequestShot);
+                                break;
+                            case GameRequest.PayloadOneofCase.ShotResult:
+                                managerConnection.ProcessShotResult(item.ShotResult);
                                 break;
                             default:
                                 logger.LogInformation("Received unknown payload type {PayloadCase}", item.PayloadCase);

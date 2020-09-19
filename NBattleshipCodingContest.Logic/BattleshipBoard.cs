@@ -85,14 +85,5 @@
                 _ => c,
             };
         }
-
-        /// <summary>
-        /// Indicates if the player of this board has lost.
-        /// </summary>
-        /// <remarks>
-        /// Lost means that all ship squares were hit by shots.
-        /// </remarks>
-        /// <seealso cref="ShootAt(int, int)"/>
-        public bool HasLost => !this.Any(s => s == SquareContent.Ship) && this.Any(s => s == SquareContent.HitShip);
     }
 }

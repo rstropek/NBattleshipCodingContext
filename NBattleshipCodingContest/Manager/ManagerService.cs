@@ -59,9 +59,10 @@
                     switch (item.PayloadCase)
                     {
                         case Status.PayloadOneofCase.Shot:
+                            await battleHostConnection.ProcessShot(item.Shot);
                             break;
                         case Status.PayloadOneofCase.Crash:
-                            break;
+                            throw new NotImplementedException("Player crashed. Graceful handling of player crash not yet implemented");
                         default:
                             logger.LogWarning("Received unknown payload type {PayloadCase}", item.PayloadCase);
                             break;

@@ -11,7 +11,7 @@
 
     [Route("api/[controller]")]
     [ApiController]
-    internal class TournamentsController : ControllerBase
+    public class TournamentsController : ControllerBase
     {
         private readonly IEnumerable<PlayerBase> players;
         private readonly BattleHostConnection battleHostConnection;
@@ -63,13 +63,16 @@
 
             var gameId = Guid.NewGuid();
 
-            while (!boardPlayer1.HasLost && !boardPlayer2.HasLost)
+            while (!shotsPlayer1.HasLost && !shotsPlayer2.HasLost)
             {
-                //var location = await battleHostConnection.Shoot(0, 1, shotsPlayer1);
-                //var shotLocation = new BoardIndex(location);
+                await battleHostConnection.Shoot(gameId, 0, 1, shotsPlayer1, boardPlayer2);
+                await battleHostConnection.Shoot(gameId, 1, 0, shotsPlayer2, boardPlayer1);
 
-                
-                //await battleHostConnection.Shoot(1, 0, shotsPlayer2);
+                Console.WriteLine(shotsPlayer1);
+                Console.WriteLine(boardPlayer2);
+
+                Console.WriteLine(shotsPlayer2);
+                Console.WriteLine(boardPlayer1);
             }
 
             return Ok();

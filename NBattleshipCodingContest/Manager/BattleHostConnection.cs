@@ -2,10 +2,10 @@
 {
     using Google.Protobuf;
     using Grpc.Core;
+    using Microsoft.Extensions.Logging;
     using NBattleshipCodingContest.Logic;
     using System;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
 
     internal enum BattleHostState
@@ -15,8 +15,13 @@
         WaitingForShot
     }
 
-    internal class BattleHostConnection
+    public class BattleHostConnection
     {
+        public BattleHostConnection(ILogger<BattleHostConnection> logger)
+        {
+            this.logger = logger;
+        }
+
         private IServerStreamWriter<GameRequest>? responseStream;
         public IServerStreamWriter<GameRequest>? ResponseStream
         {
@@ -30,22 +35,19 @@
 
         public bool IsHostConnected => responseStream != null;
 
-        private TaskCompletionSource<string>? shootCompletion;
-        private readonly object shootCompletionLockObject = new object();
+        private TaskCompletionSource? shootCompletion;
+        private readonly ILogger<BattleHostConnection> logger;
         private BoardContent? shots;
         private IReadOnlyBoard? board;
-        private UUID gameUUID;
+        private UUID? gameUUID;
 
-        protected virtual Task Delay() => Task.Delay(250);
+        protected virtual Task Delay() => Task.Delay(TimeSpan.FromMinutes(20));
 
-        public Task<string> Shoot(Guid gameId, int shooter, int opponent, BoardContent shots, IReadOnlyBoard board)
+        public Task Shoot(Guid gameId, int shooter, int opponent, BoardContent shots, IReadOnlyBoard board)
         {
-            if (!Monitor.TryEnter(shootCompletionLockObject))
-            {
-                throw new InvalidOperationException("Another shoot is still in progress");
-            }
+            logger.LogInformation("Entering shooting process");
 
-            shootCompletion = new TaskCompletionSource<string>();
+            shootCompletion = new TaskCompletionSource();
             this.shots = shots;
             this.board = board;
             gameUUID = new UUID { Value = gameId.ToString() };
@@ -53,10 +55,9 @@
             // Setup timeout task
             Delay().ContinueWith(t =>
                 {
+                    logger.LogWarning("Timeout, exiting shooting process");
                     shootCompletion.TrySetCanceled();
-                    Monitor.Exit(shootCompletionLockObject);
-                })
-                .ConfigureAwait(false);
+                });
 
             // Send shoot
             SendShoot(shooter, opponent, shots)
@@ -65,17 +66,17 @@
                     // Error during shot
                     if (t.IsFaulted && t.Exception != null)
                     {
+                        logger.LogError(t.Exception, "Error while talking to battle host");
                         shootCompletion.TrySetException(t.Exception);
-                        Monitor.Exit(shootCompletionLockObject);
                     }
-                })
-                .ConfigureAwait(false);
+                });
 
             return shootCompletion.Task;
         }
 
         private async Task SendShoot(int shooter, int opponent, IReadOnlyBoard board)
         {
+            logger.LogInformation("Sending shot request to battle host");
             await ResponseStream!.WriteAsync(new GameRequest
             {
                 RequestShot = new RequestShot
@@ -90,29 +91,20 @@
 
         private async Task SendShotResult(Logic.SquareContent content)
         {
+            logger.LogInformation("Sending shot result to battle host");
             await ResponseStream!.WriteAsync(new GameRequest
             {
                 ShotResult = new ShotResult
                 {
                     GameId = gameUUID,
-                    SquareContent = content switch
-                    {
-                        Logic.SquareContent.Unknown => SquareContent.Unknown,
-                        Logic.SquareContent.Water => SquareContent.Water,
-                        Logic.SquareContent.Ship => SquareContent.Ship,
-                        Logic.SquareContent.HitShip => SquareContent.HitShip,
-                        _ => throw new ArgumentOutOfRangeException(nameof(content))
-                    }
+                    SquareContent = (SquareContent)content
                 }
             });
         }
 
         public async Task ProcessShot(Shot shot)
         {
-            if (!Monitor.IsEntered(shootCompletionLockObject))
-            {
-                throw new InvalidOperationException("No shot in progress");
-            }
+            logger.LogInformation($"Processing incoming shot to {shot.Location}");
 
             if (shootCompletion == null || shots == null || board == null)
             {
@@ -122,15 +114,21 @@
             if (BoardIndex.TryParse(shot.Location, out var ix))
             {
                 var content = board[ix];
-                await SendShotResult(content);
-                shots[ix] = board[ix];
+                if (content == Logic.SquareContent.Ship)
+                {
+                    content = Logic.SquareContent.HitShip;
+                }
 
-                shootCompletion.TrySetResult(shot.Location);
+                logger.LogInformation($"Sending shot result to battle host (content = {content})");
+                await SendShotResult(content);
+                shots[ix] = content;
+
+                logger.LogInformation("Shooting process successfully completed");
+                shootCompletion.TrySetResult();
                 return;
             }
 
             shootCompletion.TrySetException(new Exception("Illegal shot"));
-            Monitor.Exit(shootCompletionLockObject);
         }
     }
 }

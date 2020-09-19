@@ -9,7 +9,7 @@
         {
             // Return a random shot between A1 and J10
             var rand = new Random();
-            shoot($"{'A' + rand.Next(1, 11)}{rand.Next(1, 11)}");
+            shoot($"{(char)('A' + rand.Next(10))}{rand.Next(1, 11)}");
         }
     }
 }

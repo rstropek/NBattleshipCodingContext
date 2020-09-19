@@ -13,7 +13,7 @@
             board.PlaceShip(new BoardIndex(0, 0), 2, Direction.Horizontal);
             Assert.Equal(SquareContent.Ship, board[new BoardIndex(0, 0)]);
             Assert.Equal(SquareContent.Ship, board[new BoardIndex(1, 0)]);
-            Assert.Equal(2, board.Count(s => s != SquareContent.Water));
+            Assert.Equal(2, board.Count(s => s == SquareContent.Ship));
         }
 
         [Fact]
@@ -23,7 +23,7 @@
             board.PlaceShip(new BoardIndex(0, 0), 2, Direction.Vertical);
             Assert.Equal(SquareContent.Ship, board[new BoardIndex(0, 0)]);
             Assert.Equal(SquareContent.Ship, board[new BoardIndex(0, 1)]);
-            Assert.Equal(2, board.Count(s => s != SquareContent.Water));
+            Assert.Equal(2, board.Count(s => s == SquareContent.Ship));
         }
 
         [Fact]
