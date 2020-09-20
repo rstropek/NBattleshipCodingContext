@@ -35,25 +35,6 @@
         }
 
         [Fact]
-        public void ShootAt()
-        {
-            var board = new BattleshipBoard();
-            board.PlaceShip(new BoardIndex(0, 0), 2, Direction.Horizontal);
-            board.ShootAt(new BoardIndex(0, 0));
-            Assert.Equal(SquareContent.HitShip, board[new BoardIndex(0, 0)]);
-            Assert.Equal(SquareContent.Ship, board[new BoardIndex(1, 0)]);
-        }
-
-        [Fact]
-        public void HasLost()
-        {
-            var board = new BattleshipBoard();
-            board.PlaceShip(new BoardIndex(0, 0), 1, Direction.Horizontal);
-            board.ShootAt(new BoardIndex(0, 0));
-            Assert.True(board.HasLost);
-        }
-
-        [Fact]
         public void Count()
         {
             var board = new BattleshipBoard();

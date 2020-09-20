@@ -2,6 +2,9 @@
 {
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Enables read-only access to battleship board content
+    /// </summary>
     public interface IReadOnlyBoard : IEnumerable<SquareContent>, IReadOnlyList<SquareContent>
     {
         /// <summary>

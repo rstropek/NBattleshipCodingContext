@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -52,9 +53,9 @@
 
             var rbf = new RandomBoardFiller();
             var boardPlayer1 = new BattleshipBoard();
-            rbf.Fill(new[] { 2, 3, 3, 4, 5 }, boardPlayer1);
+            rbf.Fill(BattleshipBoard.Ships, boardPlayer1);
             var boardPlayer2 = new BattleshipBoard();
-            rbf.Fill(new[] { 2, 3, 3, 4, 5 }, boardPlayer2);
+            rbf.Fill(BattleshipBoard.Ships, boardPlayer2);
 
             var shotsPlayer1 = new BoardContent();
             shotsPlayer1.Clear(Logic.SquareContent.Unknown);
@@ -63,7 +64,8 @@
 
             var gameId = Guid.NewGuid();
 
-            while (!shotsPlayer1.HasLost && !shotsPlayer2.HasLost)
+            Console.OutputEncoding = Encoding.UTF8;
+            while (!shotsPlayer1.HasLost(BattleshipBoard.Ships) && !shotsPlayer2.HasLost(BattleshipBoard.Ships))
             {
                 await battleHostConnection.Shoot(gameId, 0, 1, shotsPlayer1, boardPlayer2);
                 await battleHostConnection.Shoot(gameId, 1, 0, shotsPlayer2, boardPlayer1);

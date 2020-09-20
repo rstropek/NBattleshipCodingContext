@@ -2,10 +2,14 @@ namespace NBattleshipCodingContest.Logic.Tests
 {
     using System;
     using Xunit;
-    using static NBattleshipCodingContest.Logic.ShipPlacementChecker;
+    using static NBattleshipCodingContest.Logic.BattleshipBoard;
 
     public class ShipPlacementCheckerTests
     {
+        [Fact]
+        public void CanPlaceShip_Invalid_Ship_Length() =>
+            Assert.Throws<ArgumentOutOfRangeException>("shipLength", () => CanPlaceShip(new BoardIndex(0, 0), 11, Direction.Horizontal, (_, _) => false));
+
         [Fact]
         public void CanPlaceShip_Invalid_Col() =>
             Assert.Throws<ArgumentOutOfRangeException>("col", () => CanPlaceShip(new BoardIndex(10, 0), 2, Direction.Horizontal, (_, _) => false));
@@ -16,7 +20,7 @@ namespace NBattleshipCodingContest.Logic.Tests
 
         [Fact]
         public void CanPlaceShip_Invalid_Direction() =>
-            Assert.Throws<ArgumentException>("direction", () => CanPlaceShip(new BoardIndex(0, 0), 2, (Direction)99, (_, _) => false));
+            Assert.Throws<ArgumentOutOfRangeException>("direction", () => CanPlaceShip(new BoardIndex(0, 0), 2, (Direction)99, (_, _) => false));
 
         [Fact]
         public void CanPlaceShip_Outside_Bounds_Horizontal() =>

@@ -37,6 +37,12 @@
 
         [Fact] public void String_Conversion() => Assert.Equal("A1", new BoardIndex(0));
 
+        [Fact] public void TryParse_BoardIndex() => Assert.True(BoardIndex.TryParse("A1", out var index) && index == new BoardIndex(0, 0));
+
+        [Fact] public void TryParse_BoardIndex_Invalid() => Assert.False(BoardIndex.TryParse("K1", out _));
+
+        [Fact] public void Convert_From_String() => Assert.Equal(new BoardIndex(0, 0), (BoardIndex)"A1");
+
         [Fact]
         public void Deconstruct()
         {
@@ -49,6 +55,8 @@
 
         [Fact] public void Equals_Operator() => Assert.True(new BoardIndex(0) == new BoardIndex(0));
 
+        [Fact] public void Equals_Operator_Object() => Assert.True(new BoardIndex(0).Equals((object)new BoardIndex(0)));
+
         [Fact] public void Not_Equals_Operator() => Assert.True(new BoardIndex(0) != new BoardIndex(1));
 
         [Fact] public void HashCode() => Assert.True(new BoardIndex(0).GetHashCode() == new BoardIndex(0).GetHashCode());
@@ -60,5 +68,13 @@
         [Fact] public void NextRow() => Assert.Equal(10, new BoardIndex(0).NextRow());
 
         [Fact] public void NextRow_Invalid() => Assert.Throws<InvalidOperationException>(() => new BoardIndex(90).NextRow());
+
+        [Fact] public void TryNextColumn_Horizontal() => Assert.True(new BoardIndex(0).TryNext(Direction.Horizontal, out var ix) && ix == 1);
+
+        [Fact] public void TryNextColumn_Vertical() => Assert.True(new BoardIndex(0).TryNext(Direction.Vertical, out var ix) && ix == 10);
+
+        [Fact] public void TryNextColumn_Horizontal_Invalid() => Assert.False(new BoardIndex(9, 0).TryNext(Direction.Horizontal, out _));
+
+        [Fact] public void TryNextColumn_Vertical_Invalid() => Assert.False(new BoardIndex(0, 9).TryNext(Direction.Vertical, out _));
     }
 }

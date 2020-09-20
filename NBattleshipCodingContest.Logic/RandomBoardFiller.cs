@@ -11,14 +11,13 @@
         /// <summary>
         /// Tries to place a ship on a given location.
         /// </summary>
-        /// <param name="col">Zero-based column index</param>
-        /// <param name="row">Zero-based row index</param>
+        /// <param name="ix">Coordinates where the ship should be placed</param>
         /// <param name="shipLength">Length of ship (max. 10)</param>
         /// <param name="direction">Direction of the ship</param>
         /// <returns>
         /// <c>true</c> if the ship could be placed, otherwise <c>false</c>.
         /// </returns>
-        /// <exception cref="ArgumentException">Thrown in case of invalid arguments</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown in case of invalid arguments</exception>
         bool TryPlaceShip(BoardIndex ix, int shipLength, Direction direction);
     }
 

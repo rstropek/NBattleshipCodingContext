@@ -29,6 +29,24 @@
 
             return row * 10 + col;
         }
+
+        private static bool TryParse(string location, out int index)
+        {
+            // Note range expression. Read more at
+            // https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/ranges-indexes
+
+            // Note out parameter declaration in method call. Read more at
+            // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/out-parameter-modifier
+
+            if (location.Length is >= 2 and <= 3 && location[0] is >= 'A' and <= 'J' && int.TryParse(location[1..], out var row) && row is >= 1 and <= 10)
+            {
+                index = GetIndex(location[0] - 'A', row - 1);
+                return true;
+            }
+
+            index = 0;
+            return false;
+        }
         #endregion
 
         #region Constructors
@@ -108,6 +126,8 @@
         /// <exception cref="ArgumentOutOfRangeException">Given location has invalid format or index is out of range</exception>
         public BoardIndex(string location)
         {
+            // Note out parameter declaration in method call. Read more at
+            // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/out-parameter-modifier
             if (TryParse(location, out int ix))
             {
                 index = new BoardIndex(ix);
@@ -119,24 +139,14 @@
         #endregion
 
         #region Type conversion and deconstruction
-        private static bool TryParse(string location, out int index)
-        {
-            // Note range expression. Read more at
-            // https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/ranges-indexes
-
-            // Note out var. Read more at
-            // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/out-parameter-modifier#calling-a-method-with-an-out-argument
-
-            if (location.Length is >= 2 and <= 3 && location[0] is >= 'A' and <= 'J' && int.TryParse(location[1..], out var row) && row is >= 1 and <= 10)
-            {
-                index = GetIndex(location[0] - 'A', row - 1);
-                return true;
-            }
-
-            index = 0;
-            return false;
-        }
-
+        /// <summary>
+        /// Tries to parse a given location string.
+        /// </summary>
+        /// <param name="location">Location string (e.g. A1, B5, J10) consisting of column (A..J) and row (1..10)</param>
+        /// <param name="index">Parsed index. Content is undefined if location could not be parsed.</param>
+        /// <returns>
+        /// <c>true</c> if location could be parsed, otherwise <c>false</c>.
+        /// </returns>
         public static bool TryParse(string location, out BoardIndex index)
         {
             if (TryParse(location, out int ix))
@@ -155,7 +165,12 @@
         /// <param name="value">Value to convert</param>
         public static implicit operator string(BoardIndex value) => $"{(char)('A' + value.Column)}{value.Row + 1}";
 
-        public static implicit operator BoardIndex(string value) => new BoardIndex(value);
+        /// <summary>
+        /// Converts a given string to a board index.
+        /// </summary>
+        /// <param name="location">Location string (e.g. A1, B5, J10) consisting of column (A..J) and row (1..10)</param>
+        /// <exception cref="ArgumentOutOfRangeException">Given location has invalid format or index is out of range</exception>
+        public static implicit operator BoardIndex(string location) => new BoardIndex(location);
 
         /// <summary>
         /// Converts a <see cref="BoardIndex"/> into a zero-based board index
@@ -175,10 +190,13 @@
         #endregion
 
         #region IEquatable and object
+        /// <inheritdoc/>
         public readonly override bool Equals(object? obj) => obj is BoardIndex index && Equals(index);
 
+        /// <inheritdoc/>
         public readonly bool Equals(BoardIndex other) => index == other.index;
 
+        /// <inheritdoc/>
         public readonly override int GetHashCode() => index.GetHashCode();
 
         public static bool operator ==(BoardIndex left, BoardIndex right) => left.Equals(right);
@@ -187,14 +205,60 @@
         #endregion
 
         #region Navigation functions
+        /// <summary>
+        /// Tries to retrieve a board index referencing the next column or row.
+        /// </summary>
+        /// <param name="direction">Direction in which to go</param>
+        /// <param name="newIndex">New index. Value is undefined if method returns <c>false</c>.</param>
+        /// <returns>
+        /// <c>true</c> if movement is possible (i.e. not on outermost right or bottom column or row), otherwise <c>false</c>.
+        /// </returns>
+        public readonly bool TryNext(Direction direction, out BoardIndex newIndex)
+        {
+            if (direction == Direction.Horizontal && Column < 9)
+            {
+                newIndex = new BoardIndex(index + 1);
+                return true;
+            }
+
+            if (direction == Direction.Vertical && Row < 9)
+            {
+                newIndex = new BoardIndex(index + 10);
+                return true;
+            }
+
+            newIndex = new BoardIndex();
+            return false;
+        }
+
+        /// <summary>
+        /// Returns a new board index referencing the next column (i.e. column to the right)
+        /// </summary>
+        /// <returns>
+        /// New board index
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Already on last column</exception>
         public readonly BoardIndex NextColumn() => Column < 9 ? new BoardIndex(index + 1) : throw new InvalidOperationException("Already on last column");
 
+        /// <summary>
+        /// Returns a new board index referencing the next row (i.e. below)
+        /// </summary>
+        /// <returns>
+        /// New board index
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Already on last row</exception>
         public readonly BoardIndex NextRow() => Row < 9 ? new BoardIndex(index + 10) : throw new InvalidOperationException("Already on last row");
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets the column
+        /// </summary>
         public readonly int Column => index % 10;
 
+        /// <summary>
+        /// Gets the row
+        /// </summary>
         public readonly int Row => index / 10;
         #endregion
     }

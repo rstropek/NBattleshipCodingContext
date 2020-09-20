@@ -6,9 +6,12 @@
     using System.Linq;
 
     /// <summary>
-    /// <see cref="BattleshipBoard"/> implements a board for a battleship game.
+    /// Manages the content of a battleship board.
     /// </summary>
     /// <remarks>
+    /// <para>
+    /// The rules of the classical Battleship game apply (see also https://en.wikipedia.org/wiki/Battleship_(game)).
+    /// </para>
     /// <para>
     /// Methods reading data are thread-safe, methods writing data are not.
     /// </para>
@@ -17,14 +20,44 @@
     {
         private readonly SquareContent[] boardContent;
 
+        #region Constructors and initialization
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoardContent"/> type.
+        /// </summary>
+        /// <remarks>
+        /// All square contents are set to <see cref="SquareContent.Water"/>. Use
+        /// <see cref="Clear(SquareContent)"/> if you want to initialize all squares
+        /// with a different content.
+        /// </remarks>
         public BoardContent()
         {
             boardContent = new SquareContent[10 * 10];
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoardContent"/> type.
+        /// </summary>
+        /// <param name="initialContent">Initial content of all squares</param>
+        public BoardContent(SquareContent initialContent) : this()
+        {
+            // In C#, we cannot rely on valid values for enums, we have to check. Read more are
+            // https://docs.microsoft.com/en-us/dotnet/api/system.enum.isdefined
+
+            if (!Enum.IsDefined(typeof(SquareContent), initialContent))
+            {
+                throw new ArgumentOutOfRangeException(nameof(initialContent));
+            }
+
+            Clear(initialContent);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoardContent"/> type from given bytes.
+        /// </summary>
+        /// <param name="content">100 bytes containing square contents</param>
         public BoardContent(IEnumerable<byte> content)
         {
-            if (content.Count() != 10 * 10 || content.Any(c => c is < 0 or > (byte)SquareContent.Unknown))
+            if (content.Count() != 10 * 10 || content.Any(s => !Enum.IsDefined(typeof(SquareContent), s)))
             {
                 throw new ArgumentOutOfRangeException(nameof(content));
             }
@@ -43,7 +76,9 @@
                 boardContent[i] = content;
             }
         }
+        #endregion
 
+        #region Enumerable implementation
         /// <inheritdoc/>
         public SquareContent this[BoardIndex ix]
         {
@@ -72,16 +107,19 @@
 
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        #endregion
 
         /// <summary>
         /// Indicates if the player of this board has lost.
         /// </summary>
+        /// <param name="ships">Ships that were placed on the board</param>
         /// <remarks>
-        /// Lost means that all ship squares were hit by shots.
+        /// Lost means that all ship squares were hit by shots
         /// </remarks>
         /// <seealso cref="ShootAt(int, int)"/>
-        public bool HasLost => this.Count(s => s == SquareContent.HitShip) == 5 + 4 + 3 + 3 + 2;
+        public bool HasLost(params int[] ships) => this.Count(s => s == SquareContent.HitShip) == ships.Sum();
 
+        #region String conversion
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -166,5 +204,6 @@
                 ((ReadOnlySpan<char>)seps.bottom).CopyTo(buf);
             });
         }
+        #endregion
     }
 }

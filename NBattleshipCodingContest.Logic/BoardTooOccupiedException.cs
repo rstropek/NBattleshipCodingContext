@@ -3,6 +3,9 @@
     using System;
     using System.Runtime.Serialization;
 
+    /// <summary>
+    /// Indicates that no placement of all the ships for the board could have been found.
+    /// </summary>
     public class BoardTooOccupiedException : ApplicationException
     {
         public BoardTooOccupiedException()
