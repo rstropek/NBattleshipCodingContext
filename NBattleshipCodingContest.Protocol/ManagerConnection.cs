@@ -12,6 +12,9 @@
         Connected
     }
 
+    /// <summary>
+    /// Represents a connection of the battle host to the manager
+    /// </summary>
     public interface IManagerConnection
     {
         /// <summary>
@@ -38,14 +41,19 @@
         void Handle(GameRequest request);
     }
 
+    /// <summary>
+    /// Implements a connection of the manager to the battle host
+    /// </summary>
     public class ManagerConnection : IManagerConnection
     {
         private TaskCompletionSource<Logic.SquareContent>? shotCompletion;
         private readonly ILogger<ManagerConnection> logger;
+        private readonly PlayerInfo[] players;
 
-        public ManagerConnection(ILogger<ManagerConnection> logger)
+        public ManagerConnection(ILogger<ManagerConnection> logger, PlayerInfo[] players)
         {
             this.logger = logger;
+            this.players = players;
         }
 
         private IClientStreamWriter<PlayerResponse>? PlayerResponseStream { get; set; }
@@ -86,7 +94,13 @@
             switch (request.PayloadCase)
             {
                 case GameRequest.PayloadOneofCase.ShotRequest:
-                    GetShot(request.ShotRequest);
+                    GetShot(request.ShotRequest).ContinueWith(t =>
+                    {
+                        if (t.IsFaulted && t.Exception != null)
+                        {
+                            logger.LogError(t.Exception, "Error getting shot");
+                        }
+                    });
                     break;
                 case GameRequest.PayloadOneofCase.ShotResult:
                     ProcessShotResult(request.ShotResult);
@@ -97,7 +111,7 @@
             }
         }
 
-        private void GetShot(ShotRequest request)
+        private async Task GetShot(ShotRequest request)
         {
             if (State == ManagerConnectionState.Disconnected)
             {
@@ -107,15 +121,15 @@
             shotCompletion = new TaskCompletionSource<Logic.SquareContent>();
 
             var shotRequest = ProtocolTranslator.DecodeShotRequest(request);
-            var shooter = PlayerList.Players[shotRequest.Shooter].Create();
-            shooter.GetShot(shotRequest.GameId, PlayerList.Players[shotRequest.Opponent].Name, shotRequest.BoardShooterView, loc =>
+            var shooter = players[shotRequest.Shooter].Create();
+            await shooter.GetShot(shotRequest.GameId, players[shotRequest.Opponent].Name, shotRequest.BoardShooterView, loc =>
             {
                 if (PlayerResponseStream == null)
                 {
                     throw new InvalidOperationException("No response stream. Should never happen!");
                 }
 
-                PlayerResponseStream.WriteAsync(ProtocolTranslator.EncodeShotResponse(new(shotRequest.GameId, loc)))
+                Send(ProtocolTranslator.EncodeShotResponse(new(shotRequest.GameId, loc)))
                     .ContinueWith(t =>
                     {
                         if (t.IsFaulted && t.Exception != null)
@@ -127,6 +141,17 @@
 
                 return shotCompletion.Task;
             });
+        }
+
+
+        private async Task Send(PlayerResponse response)
+        {
+            if (State == ManagerConnectionState.Disconnected || PlayerResponseStream == null)
+            {
+                throw new InvalidOperationException("No manager connected.");
+            }
+
+            await PlayerResponseStream.WriteAsync(response);
         }
 
         private void ProcessShotResult(Protocol.ShotResult result)

@@ -12,7 +12,7 @@ namespace NBattleshipCodingContest.Players.Tests
         {
             var board = new BoardContent(SquareContent.Water);
             var player = new Sequential();
-            Assert.Throws<InvalidOperationException>(() => player.GetShot(Guid.Empty, string.Empty, board, _ => Task.FromResult(SquareContent.Water)));
+            Assert.ThrowsAsync<InvalidOperationException>(() => player.GetShot(Guid.Empty, string.Empty, board, _ => Task.FromResult(SquareContent.Water)));
         }
 
         [Fact]

@@ -2,6 +2,8 @@
 {
     using NBattleshipCodingContest.Logic;
     using System;
+    using System.Runtime.CompilerServices;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Implements a battleship player that randomly shoots at squares
@@ -9,11 +11,11 @@
     public class RandomShots : PlayerBase
     {
         /// <inheritdoc />
-        public override void GetShot(Guid _, string __, IReadOnlyBoard ___, Shoot shoot)
+        public override async Task GetShot(Guid _, string __, IReadOnlyBoard ___, Shoot shoot)
         {
             // Return a random shot between A1 and J10
             var rand = new Random();
-            shoot($"{(char)('A' + rand.Next(10))}{rand.Next(1, 11)}");
+            await shoot($"{(char)('A' + rand.Next(10))}{rand.Next(1, 11)}");
         }
     }
 }

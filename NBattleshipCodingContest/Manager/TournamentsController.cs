@@ -17,7 +17,7 @@
         private readonly IEnumerable<PlayerInfo> players;
         private readonly IBattleHostConnection battleHostConnection;
 
-        public TournamentsController(IEnumerable<PlayerInfo> players, IBattleHostConnection battleHostConnection)
+        public TournamentsController(PlayerInfo[] players, IBattleHostConnection battleHostConnection)
         {
             this.players = players;
             this.battleHostConnection = battleHostConnection;

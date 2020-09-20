@@ -108,11 +108,27 @@
     /// <summary>
     /// Factory for <see cref="Game"/> instances.
     /// </summary>
+    public interface IGameFactory
+    {
+        /// <summary>
+        /// Create a <see cref="Game"/> instance.
+        /// </summary>
+        /// <param name="player1Index">Index of player 1</param>
+        /// <param name="player2Index">Index of player 2</param>
+        /// <returns>
+        /// New game.
+        /// </returns>
+        Game Create(int player1Index, int player2Index);
+    }
+
+    /// <summary>
+    /// Factory for <see cref="Game"/> instances.
+    /// </summary>
     /// <remarks>
     /// The reason for this factory is that it needs a <see cref="IBoardFiller"/>
     /// from dependency injection.
     /// </remarks>
-    public class GameFactory
+    public class GameFactory : IGameFactory
     {
         private readonly IBoardFiller filler;
 
@@ -125,14 +141,7 @@
             this.filler = filler;
         }
 
-        /// <summary>
-        /// Create a <see cref="Game"/> instance.
-        /// </summary>
-        /// <param name="player1Index">Index of player 1</param>
-        /// <param name="player2Index">Index of player 2</param>
-        /// <returns>
-        /// New game.
-        /// </returns>
+        /// <inheritdoc/>
         public Game Create(int player1Index, int player2Index)
         {
             var boards = new BattleshipBoard[2];

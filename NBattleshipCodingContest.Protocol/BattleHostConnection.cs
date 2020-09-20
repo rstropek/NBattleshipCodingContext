@@ -95,7 +95,7 @@
     public class BattleHostConnection : IBattleHostConnection
     {
         private int shooter = -1;
-        private readonly GameFactory gameFactory;
+        private readonly IGameFactory gameFactory;
         private readonly ILogger<BattleHostConnection> logger;
         private TaskCompletionSource? shootCompletion;
 
@@ -104,7 +104,7 @@
         /// </summary>
         /// <param name="gameFactory">Factory used to create games</param>
         /// <param name="logger">Logger</param>
-        public BattleHostConnection(GameFactory gameFactory, ILogger<BattleHostConnection> logger)
+        public BattleHostConnection(IGameFactory gameFactory, ILogger<BattleHostConnection> logger)
         {
             this.gameFactory = gameFactory;
             this.logger = logger;

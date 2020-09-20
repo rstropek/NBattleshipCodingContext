@@ -10,6 +10,7 @@
     using System.IO;
     using System.Threading.Tasks;
     using static NBattleshipCodingContest.Protocol.Manager;
+    using NBattleshipCodingContest.Players;
 
     internal class BattleHostMain
     {
@@ -43,6 +44,9 @@
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddGrpcClient<ManagerClient>(o => { o.Address = new Uri(options.ManagerUrl); });
+
+                    // Add all players
+                    services.AddSingleton(PlayerList.Players);
                     services.AddSingleton<IManagerConnection, ManagerConnection>();
                     services.AddHostedService<BattleHostService>();
                 })

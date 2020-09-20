@@ -44,6 +44,6 @@
         /// The <paramref name="gameId"/> will stay the same during a single game between two players.
         /// </para>
         /// </remarks>
-        public abstract void GetShot(Guid gameId, string opponentId, IReadOnlyBoard board, Shoot shoot);
+        public abstract Task GetShot(Guid gameId, string opponentId, IReadOnlyBoard board, Shoot shoot);
     }
 }

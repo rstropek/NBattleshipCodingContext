@@ -25,10 +25,7 @@
                         .ConfigureServices(services =>
                         {
                             // Add all players
-                            foreach (var player in PlayerList.Players)
-                            {
-                                services.AddSingleton(player);
-                            }
+                            services.AddSingleton(PlayerList.Players);
 
                             services.AddOpenApiDocument(settings =>
                             {
@@ -37,7 +34,7 @@
                             });
                             services.AddGrpc();
                             services.AddControllers();
-                            services.AddSingleton<GameFactory>();
+                            services.AddSingleton<IGameFactory, GameFactory>();
                             services.AddSingleton<IBoardFiller, RandomBoardFiller>();
                             services.AddSingleton<IBattleHostConnection, BattleHostConnection>();
                         })
