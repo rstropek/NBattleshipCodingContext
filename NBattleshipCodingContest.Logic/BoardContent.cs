@@ -109,15 +109,10 @@
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         #endregion
 
-        /// <summary>
-        /// Indicates if the player of this board has lost.
-        /// </summary>
-        /// <param name="ships">Ships that were placed on the board</param>
-        /// <remarks>
-        /// Lost means that all ship squares were hit by shots
-        /// </remarks>
-        /// <seealso cref="ShootAt(int, int)"/>
-        public bool HasLost(params int[] ships) => this.Count(s => s == SquareContent.HitShip) == ships.Sum();
+        /// <inheritdoc />
+        public bool HasLost(params int[] ships) => ships.Length > 0 
+            ? this.Count(s => s == SquareContent.HitShip) == ships.Sum() 
+            : throw new ArgumentException("You must pass in at least one ship", nameof(ships));
 
         #region String conversion
         /// <inheritdoc/>

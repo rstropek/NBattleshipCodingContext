@@ -1,14 +1,15 @@
-﻿namespace NBattleshipCodingContest.Players
+﻿namespace NBattleshipCodingContest.BattleHost
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using NBattleshipCodingContest.Protocol;
     using Serilog;
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Threading.Tasks;
-    using static NBattleshipCodingContest.Manager.Manager;
+    using static NBattleshipCodingContest.Protocol.Manager;
 
     internal class BattleHostMain
     {
@@ -42,6 +43,7 @@
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddGrpcClient<ManagerClient>(o => { o.Address = new Uri(options.ManagerUrl); });
+                    services.AddSingleton<IManagerConnection, ManagerConnection>();
                     services.AddHostedService<BattleHostService>();
                 })
                 .UseSerilog()

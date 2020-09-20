@@ -9,15 +9,19 @@ namespace NBattleshipCodingContest.PlayersGenerator.Tests
     public class PlayersGeneratorTest
     {
         [Fact]
-        public void Initialize()
+        public void InitializeImpl()
         {
             var generator = new PlayersGenerator();
 
             SyntaxReceiverCreator? receiver = null;
-            generator.InitializeImpl((r) => receiver = r);
+            PlayersGenerator.InitializeImpl((r) => receiver = r);
 
             // Make sure that syntax receiver is registered during initialization
             Assert.NotNull(receiver);
+
+            // Note null forgiving operator. Read more at
+            // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
+
             Assert.IsAssignableFrom<PlayersGenerator.SyntaxReceiver>(receiver!());
         }
 
@@ -41,6 +45,9 @@ namespace NBattleshipCodingContest.Players
 }
 ";
 
+        /// <summary>
+        /// Compile given code and return syntax tree and compilation.
+        /// </summary>
         private static (SyntaxTree, Compilation) Compile(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
@@ -50,6 +57,9 @@ namespace NBattleshipCodingContest.Players
             return (tree, compilation);
         }
 
+        /// <summary>
+        /// Helper class that wraps a <see cref="PlayersGenerator.SyntaxReceiver"/> into a <see cref="CSharpSyntaxWalker"/>
+        /// </summary>
         private class ClassCollector : CSharpSyntaxWalker
         {
             private readonly PlayersGenerator.SyntaxReceiver receiver;
@@ -60,11 +70,17 @@ namespace NBattleshipCodingContest.Players
                 receiver.OnVisitSyntaxNode(classDeclarationSyntax);
         }
 
+        /// <summary>
+        /// Helper method that runs the receiver over a given syntax tree.
+        /// </summary>
         private static PlayersGenerator.SyntaxReceiver FillReceiver(SyntaxTree tree)
         {
             var receiver = new PlayersGenerator.SyntaxReceiver();
+
+            // Use a syntax walker to fill receiver
             var collector = new ClassCollector(receiver);
             collector.Visit(tree.GetRoot());
+
             return receiver;
         }
 
@@ -73,7 +89,10 @@ namespace NBattleshipCodingContest.Players
         {
             var (tree, _) = Compile(Code);
             var receiver = FillReceiver(tree);
-            Assert.NotEmpty(receiver.CandidateClasses);
+
+            // Check that syntax receiver recogniced candidate classes (i.e. classes
+            // with at least one base class).
+            Assert.Equal(4, receiver.CandidateClasses.Count);
         }
 
         [Fact]
@@ -84,10 +103,14 @@ namespace NBattleshipCodingContest.Players
 
             var generator = new PlayersGenerator();
             SourceText? sourceText = null;
-            generator.ExecuteImpl(receiver.CandidateClasses, compilation, st => sourceText = st);
+            PlayersGenerator.ExecuteImpl(receiver.CandidateClasses, compilation, st => sourceText = st);
 
+            // Make sure that source text contains the test player
             Assert.NotNull(sourceText);
             Assert.Contains("MyPlayer", sourceText!.ToString());
+
+            // Note that in practice, you would probably use Roslyn to compile the generated
+            // code and check its syntax tree. We do not do that to keep the sample simple.
         }
     }
 }

@@ -19,6 +19,9 @@
     [Generator]
     public class PlayersGenerator : ISourceGenerator
     {
+        /// <summary>
+        /// Visitor class that finds possible players.
+        /// </summary>
         internal class SyntaxReceiver : ISyntaxReceiver
         {
             public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
@@ -34,31 +37,31 @@
             }
         }
 
-        public void Initialize(GeneratorInitializationContext context)
-        {
+        /// <inheritdoc/>
+        public void Initialize(GeneratorInitializationContext context) =>
+            // We do the work in a helper functions because we want to be able to verify that
+            // a syntax receiver is registeres. However, our mocking framework Moq does not support
+            // creating mock objects for structs like this (at least I don't know how to do it).
             InitializeImpl(context.RegisterForSyntaxNotifications);
-        }
 
-        internal void InitializeImpl(Action<SyntaxReceiverCreator> registerForSyntaxNotifications)
-        {
+        internal static void InitializeImpl(Action<SyntaxReceiverCreator> registerForSyntaxNotifications) =>
             // Register a syntax receiver that will be created for each generation pass
             registerForSyntaxNotifications(() => new SyntaxReceiver());
-        }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            // retreive the populated receiver 
             if (context.SyntaxReceiver is not SyntaxReceiver receiver || receiver.CandidateClasses == null)
             {
-                return;
+                throw new InvalidOperationException("Wrong syntax receiver or receiver never ran. Should never happen!");
             }
 
             ExecuteImpl(receiver.CandidateClasses, context.Compilation, st => context.AddSource("PlayersGenerated", st));
         }
 
-        public void ExecuteImpl(List<ClassDeclarationSyntax> candidateClasses, Compilation compilation, Action<SourceText> addSource)
+        internal static void ExecuteImpl(List<ClassDeclarationSyntax> candidateClasses, Compilation compilation, Action<SourceText> addSource)
         {
-            // begin creating the source we'll inject into the users compilation
+            // Begin creating the source we'll inject into the users compilation
+
             StringBuilder sourceBuilder = new(@"
 namespace NBattleshipCodingContest.Players
 {
@@ -66,7 +69,7 @@ namespace NBattleshipCodingContest.Players
 
     public static class PlayerList
     {
-        public static readonly PlayerBase[] Players = new PlayerBase[] 
+        public static readonly PlayerInfo[] Players = new PlayerInfo[] 
         {
 ");
 
@@ -108,7 +111,11 @@ namespace NBattleshipCodingContest.Players
             }
 
             // Add all players to generated code
-            sourceBuilder.Append(string.Join(",", playerClasses.Select(c => $"new {c.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}()")));
+            sourceBuilder.Append(string.Join(",", playerClasses.Select(c =>
+            {
+                var displayString = c.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return @$"new PlayerInfo(""{displayString}"", () => new {displayString}())";
+            })));
 
             // finish creating the source to inject
             sourceBuilder.Append(@"

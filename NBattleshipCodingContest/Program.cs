@@ -2,11 +2,12 @@
 {
     using CommandLine;
     using Microsoft.Extensions.Configuration;
+    using NBattleshipCodingContest.BattleHost;
     using NBattleshipCodingContest.Manager;
-    using NBattleshipCodingContest.Players;
     using Serilog;
     using System;
     using System.IO;
+    using System.Text;
 
     class Program
     {
@@ -19,6 +20,10 @@
 
         static void Main(string[] args)
         {
+            // Set proper output encoding for ASCII extended characters
+            // (used to draw battleship boards on the screen).
+            Console.OutputEncoding = Encoding.UTF8;
+
             // Setup logger
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(Configuration)
@@ -28,11 +33,29 @@
 
             // Parse command line arguments and start services
             // depending on given verb.
-            Parser.Default.ParseArguments<ManagerOptions, BattleHostOptions>(args)
+            Parser.Default.ParseArguments<ManagerOptions, BattleHostOptions, AboutOptions>(args)
                 .MapResult(
                   (ManagerOptions options) => StartRunnerAndReturnExitCode(options),
                   (BattleHostOptions options) => StartBattleHostAndReturnExitCode(options),
+                  (AboutOptions options) => ShowAboutAndReturnExitCode(options),
                   errors => 1);
+        }
+
+        private static int ShowAboutAndReturnExitCode(AboutOptions _)
+        {
+            Console.WriteLine("Learn C# with classical Battleship game.");
+            Console.WriteLine("By Rainer Stropek");
+            Console.WriteLine(@"
+              |    |    |                 
+             )_)  )_)  )_)              
+            )___))___))___)\            
+           )____)____)_____)\\
+         _____|____|____|____\\\__
+---------\                   /---------
+    ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+      ^^^^      ^^^^     ^^^    ^^
+           ^^^^      ^^^");
+            return 0;
         }
 
         private static int StartBattleHostAndReturnExitCode(BattleHostOptions options)

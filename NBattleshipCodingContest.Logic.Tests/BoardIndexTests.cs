@@ -76,5 +76,9 @@
         [Fact] public void TryNextColumn_Horizontal_Invalid() => Assert.False(new BoardIndex(9, 0).TryNext(Direction.Horizontal, out _));
 
         [Fact] public void TryNextColumn_Vertical_Invalid() => Assert.False(new BoardIndex(0, 9).TryNext(Direction.Vertical, out _));
+
+        [Fact] public void Next() => Assert.Equal(new BoardIndex(1), new BoardIndex(0).Next());
+
+        [Fact] public void Next_Invalid() => Assert.Throws<InvalidOperationException>(() => new BoardIndex(99).Next());
     }
 }

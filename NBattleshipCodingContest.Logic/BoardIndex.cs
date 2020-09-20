@@ -232,6 +232,23 @@
         }
 
         /// <summary>
+        /// Returns a new board index referencing the next square (wraps to next row if necessary)
+        /// </summary>
+        /// <returns>
+        /// New board index
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Already on last square</exception>
+        public readonly BoardIndex Next()
+        {
+            if (index < 10 * 10 - 1)
+            {
+                return new BoardIndex(index + 1);
+            }
+
+            throw new InvalidOperationException("Already on last square");
+        }
+
+        /// <summary>
         /// Returns a new board index referencing the next column (i.e. column to the right)
         /// </summary>
         /// <returns>

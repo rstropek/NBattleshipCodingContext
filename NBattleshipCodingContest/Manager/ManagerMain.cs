@@ -8,6 +8,8 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using NBattleshipCodingContest.Players;
+    using NBattleshipCodingContest.Protocol;
+    using NBattleshipCodingContest.Logic;
 
     internal class ManagerMain
     {
@@ -35,7 +37,9 @@
                             });
                             services.AddGrpc();
                             services.AddControllers();
-                            services.AddSingleton<BattleHostConnection>();
+                            services.AddSingleton<GameFactory>();
+                            services.AddSingleton<IBoardFiller, RandomBoardFiller>();
+                            services.AddSingleton<IBattleHostConnection, BattleHostConnection>();
                         })
                         .Configure((context, app) =>
                         {

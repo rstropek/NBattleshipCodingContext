@@ -1,8 +1,8 @@
-﻿namespace NBattleshipCodingContest
+﻿namespace NBattleshipCodingContest.BattleHost
 {
     using CommandLine;
 
-    [Verb("battle", HelpText = "Starts a battle host process (gRPC client).")]
+    [Verb("battlehost", HelpText = "Starts a battle host process (gRPC client).")]
     internal class BattleHostOptions
     {
         [Option('u', "allow-unencrypted", HelpText = "Allow unencrypted gRPC connections.", Default = true)]

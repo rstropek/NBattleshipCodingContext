@@ -3,20 +3,21 @@
     using NBattleshipCodingContest.Logic;
     using System;
 
+    /// <summary>
+    /// Implements a battleship player that shoots at one cell after the other
+    /// </summary>
     public class Sequential : PlayerBase
     {
-        private int nextShot;
-
-        public override void GetShot(IReadOnlyBoard _, Shoot shoot)
+        /// <inheritdoc />
+        public override void GetShot(Guid _, string __, IReadOnlyBoard board, Shoot shoot)
         {
-            if (nextShot >= 100)
-            {
-                throw new InvalidOperationException("Next shot index exceeded maximum, invalid program state");
-            }
+            var ix = new BoardIndex();
 
-            var result =  $"{(char)('A' + nextShot % 10)}{nextShot / 10 + 1}";
-            shoot(result);
-            nextShot++;
+            // Find next unknown square
+            while (board[ix] != SquareContent.Unknown) ix = ix.Next();
+
+            // Shoot at first unknonwn square
+            shoot(ix);
         }
     }
 }

@@ -3,21 +3,21 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using NBattleshipCodingContest.Logic;
     using NBattleshipCodingContest.Players;
+    using NBattleshipCodingContest.Protocol;
 
     [Route("api/[controller]")]
     [ApiController]
     public class TournamentsController : ControllerBase
     {
-        private readonly IEnumerable<PlayerBase> players;
-        private readonly BattleHostConnection battleHostConnection;
+        private readonly IEnumerable<PlayerInfo> players;
+        private readonly IBattleHostConnection battleHostConnection;
 
-        public TournamentsController(IEnumerable<PlayerBase> players, BattleHostConnection battleHostConnection)
+        public TournamentsController(IEnumerable<PlayerInfo> players, IBattleHostConnection battleHostConnection)
         {
             this.players = players;
             this.battleHostConnection = battleHostConnection;
@@ -37,44 +37,30 @@
                 });
             }
 
-            if (!battleHostConnection.IsHostConnected)
+            if (!battleHostConnection.CanStartGame)
             {
                 return BadRequest(new ProblemDetails
                 {
                     Type = "Battle Host Error",
                     Status = StatusCodes.Status500InternalServerError,
-                    Title = "No battle host connected to manager",
-                    Detail = "There is not battle host connected to the manager. Did you forget to start it?"
+                    Title = "Connection to battle host does currently not allow new games.",
+                    Detail = "Did you forget to connect?"
                 });
             }
 
-            var player1 = players.First();
-            var player2 = players.Skip(1).First();
+            var (x, y) = Console.GetCursorPosition();
 
-            var rbf = new RandomBoardFiller();
-            var boardPlayer1 = new BattleshipBoard();
-            rbf.Fill(BattleshipBoard.Ships, boardPlayer1);
-            var boardPlayer2 = new BattleshipBoard();
-            rbf.Fill(BattleshipBoard.Ships, boardPlayer2);
-
-            var shotsPlayer1 = new BoardContent();
-            shotsPlayer1.Clear(Logic.SquareContent.Unknown);
-            var shotsPlayer2 = new BoardContent();
-            shotsPlayer2.Clear(Logic.SquareContent.Unknown);
-
-            var gameId = Guid.NewGuid();
-
-            Console.OutputEncoding = Encoding.UTF8;
-            while (!shotsPlayer1.HasLost(BattleshipBoard.Ships) && !shotsPlayer2.HasLost(BattleshipBoard.Ships))
+            battleHostConnection.StartGame(0, 1);
+            while (battleHostConnection.Game != null && battleHostConnection.Game.GetWinner(BattleshipBoard.Ships) == Winner.NoWinner)
             {
-                await battleHostConnection.Shoot(gameId, 0, 1, shotsPlayer1, boardPlayer2);
-                await battleHostConnection.Shoot(gameId, 1, 0, shotsPlayer2, boardPlayer1);
+                await battleHostConnection.Shoot(1);
+                await battleHostConnection.Shoot(2);
 
-                Console.WriteLine(shotsPlayer1);
-                Console.WriteLine(boardPlayer2);
-
-                Console.WriteLine(shotsPlayer2);
-                Console.WriteLine(boardPlayer1);
+                Console.SetCursorPosition(x, y);
+                Console.WriteLine(PlayerList.Players[battleHostConnection.Game.PlayerIndexes[0]].Name);
+                Console.WriteLine(battleHostConnection.Game.ShootingBoards[0]);
+                Console.WriteLine(PlayerList.Players[battleHostConnection.Game.PlayerIndexes[1]].Name);
+                Console.WriteLine(battleHostConnection.Game.ShootingBoards[1]);
             }
 
             return Ok();
